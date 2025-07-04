@@ -53,7 +53,10 @@ def split_sentence(sentence, num_parts, word_limit=20, index=-1, retry_attempt=0
         if f'split{choice}' not in response_data:
             return {"status": "error", "message": "Missing required key: `split`"}
         if "[br]" not in response_data[f"split{choice}"]:
-            return {"status": "error", "message": "Split failed, no [br] found"}
+            if "br" in response_data[f"split{choice}"]:
+                response_data[f"split{choice}"] = response_data[f"split{choice}"].replace("br", "[br]")
+            else:
+                return {"status": "error", "message": "Split failed, no [br] found"}
         return {"status": "success", "message": "Split completed"}
     
     response_data = ask_gpt(split_prompt + " " * retry_attempt, resp_type='json', valid_def=valid_split, log_title='split_by_meaning')

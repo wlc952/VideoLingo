@@ -26,7 +26,22 @@ def translate_lines(lines, previous_content_prompt, after_cotent_prompt, things_
         def valid_faith(response_data):
             return valid_translate_result(response_data, [str(i) for i in range(1, length+1)], ['direct'])
         def valid_express(response_data):
-            return valid_translate_result(response_data, [str(i) for i in range(1, length+1)], ['free'])
+            # Check if response_data has the correct structure
+            required_keys = [str(i) for i in range(1, length+1)]
+            if not all(key in response_data for key in required_keys):
+                return {"status": "error", "message": f"Missing required key(s): {', '.join(set(required_keys) - set(response_data.keys()))}"}
+
+            # Check and handle missing 'free' field
+            for key in response_data:
+                if isinstance(response_data[key], dict):
+                    if 'free' not in response_data[key]:
+                        if 'direct' in response_data[key]:
+                            # Use direct as fallback for free
+                            response_data[key]['free'] = response_data[key]['direct']
+                        else:
+                            return {"status": "error", "message": f"Missing both 'free' and 'direct' fields in item {key}"}
+            
+            return {"status": "success", "message": "Translation completed"}
         for retry in range(3):
             if step_name == 'faithfulness':
                 result = ask_gpt(prompt+retry* " ", resp_type='json', valid_def=valid_faith, log_title=f'translate_{step_name}')
