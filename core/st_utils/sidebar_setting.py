@@ -59,7 +59,7 @@ def page_setting():
                 update_key("whisper.language", langs[lang])
                 st.rerun()
 
-        runtime = st.selectbox(t("WhisperX Runtime"), options=["local", "cloud", "elevenlabs"], index=["local", "cloud", "elevenlabs"].index(load_key("whisper.runtime")), help=t("Local runtime requires >8GB GPU, cloud runtime requires 302ai API key, elevenlabs runtime requires ElevenLabs API key"))
+        runtime = st.selectbox(t("WhisperX Runtime"), options=["local", "cloud", "elevenlabs", "custom_api"], index=["local", "cloud", "elevenlabs", "custom_api"].index(load_key("whisper.runtime")), help=t("Local runtime requires >8GB GPU, cloud runtime requires 302ai API key, elevenlabs runtime requires ElevenLabs API key"))
         if runtime != load_key("whisper.runtime"):
             update_key("whisper.runtime", runtime)
             st.rerun()
@@ -67,6 +67,8 @@ def page_setting():
             config_input(t("WhisperX 302ai API"), "whisper.whisperX_302_api_key")
         if runtime == "elevenlabs":
             config_input(("ElevenLabs API"), "whisper.elevenlabs_api_key")
+        if runtime == "custom_api":
+            config_input(t("Custom API URL"), "whisper.custom_api_url")
 
         with c2:
             target_language = st.text_input(t("Target Lang"), value=load_key("target_language"), help=t("Input any language in natural language, as long as llm can understand"))
@@ -151,6 +153,9 @@ def page_setting():
         
         elif select_tts == "f5tts":
             config_input("302ai API", "f5tts.302_api")
+
+        elif select_tts == "custom_tts":
+            config_input(t("BASE_URL"), "custom_tts.base_url")
         
 def check_api():
     try:

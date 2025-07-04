@@ -32,6 +32,9 @@ def transcribe():
     elif runtime == "elevenlabs":
         from core.asr_backend.elevenlabs_asr import transcribe_audio_elevenlabs as ts
         rprint("[cyan]🎤 Transcribing audio with ElevenLabs API...[/cyan]")
+    elif runtime == "custom_api":
+        from core.asr_backend.custom_api_asr import transcribe_audio_custom_api as ts
+        rprint("[cyan]🎤 Transcribing audio with Custom API...[/cyan]")
 
     for start, end in segments:
         result = ts(_RAW_AUDIO_FILE, vocal_audio, start, end)
