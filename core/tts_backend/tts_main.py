@@ -13,7 +13,8 @@ from core.tts_backend.sf_cosyvoice2 import cosyvoice_tts_for_videolingo
 from core.tts_backend.custom_tts import custom_tts
 from core.prompts import get_correct_text_prompt
 from core.tts_backend._302_f5tts import f5_tts_for_videolingo
-from core.utils import *
+from core.tts_backend.index_tts import index_tts_for_videolingo
+from core.utils import rprint, load_key, ask_gpt
 
 def clean_text_for_tts(text):
     """Remove problematic characters for TTS"""
@@ -45,7 +46,13 @@ def tts_main(text, save_as, number, task_df):
             if attempt >= max_retries - 1:
                 print("Asking GPT to correct text...")
                 correct_text = ask_gpt(get_correct_text_prompt(text),resp_type="json", log_title='tts_correct_text')
-                text = correct_text['text']
+                try:
+                    new_text = correct_text['text'] if isinstance(correct_text, dict) else None
+                    if isinstance(new_text, str) and new_text.strip():
+                        text = new_text
+                except Exception:
+                    # keep original text if unexpected structure
+                    pass
             if TTS_METHOD == 'openai_tts':
                 openai_tts(text, save_as)
             elif TTS_METHOD == 'gpt_sovits':
@@ -64,6 +71,8 @@ def tts_main(text, save_as, number, task_df):
                 cosyvoice_tts_for_videolingo(text, save_as, number, task_df)
             elif TTS_METHOD == 'f5tts':
                 f5_tts_for_videolingo(text, save_as, number, task_df)
+            elif TTS_METHOD == 'index_tts':
+                index_tts_for_videolingo(text, save_as, number, task_df)
                 
             # Check generated audio duration
             duration = get_audio_duration(save_as)

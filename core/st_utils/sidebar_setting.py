@@ -1,7 +1,7 @@
 import streamlit as st
 from translations.translations import translate as t
 from translations.translations import DISPLAY_LANGUAGES
-from core.utils import *
+from core.utils import load_key, update_key, ask_gpt
 
 def config_input(label, key, help=None):
     """Generic config input handler"""
@@ -86,7 +86,7 @@ def page_setting():
             update_key("burn_subtitles", burn_subtitles)
             st.rerun()
     with st.expander(t("Dubbing Settings"), expanded=True):
-        tts_methods = ["azure_tts", "openai_tts", "fish_tts", "sf_fish_tts", "edge_tts", "gpt_sovits", "custom_tts", "sf_cosyvoice2", "f5tts"]
+        tts_methods = ["azure_tts", "openai_tts", "fish_tts", "sf_fish_tts", "edge_tts", "gpt_sovits", "custom_tts", "sf_cosyvoice2", "f5tts", "index_tts"]
         select_tts = st.selectbox(t("TTS Method"), options=tts_methods, index=tts_methods.index(load_key("tts_method")))
         if select_tts != load_key("tts_method"):
             update_key("tts_method", select_tts)
@@ -157,11 +157,17 @@ def page_setting():
         elif select_tts == "custom_tts":
             config_input(t("BASE_URL"), "custom_tts.base_url")
         
+        elif select_tts == "index_tts":
+            config_input(t("BASE_URL"), "index_tts.base_url")
+        
 def check_api():
     try:
-        resp = ask_gpt("This is a test, response 'message':'success' in json format.", 
-                      resp_type="json", log_title='None')
-        return resp.get('message') == 'success'
+        resp = ask_gpt(
+            "This is a test, response 'message':'success' in json format.",
+            resp_type="json",
+            log_title='None'
+        )
+        return isinstance(resp, dict) and resp.get('message') == 'success'
     except Exception:
         return False
     
